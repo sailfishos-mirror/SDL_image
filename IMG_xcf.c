@@ -227,22 +227,16 @@ int IMG_isXCF(SDL_RWops *src)
 	return(is_XCF);
 }
 
-/* SDL-1.2 doesn't have a SDL_RWsize(). sigh... */
-static Sint32 SDLCALL SDL12_RWsize(SDL_RWops *rw) {
-  Sint32 pos, size;
-  if ((pos=SDL_RWtell(rw))<0) return -1;
-  size = SDL_RWseek(rw, 0, RW_SEEK_END);
-  SDL_RWseek(rw, pos, RW_SEEK_SET);
-  return size;
-}
-
 static char * read_string (SDL_RWops * src) {
-  Sint32 remaining;
+  Sint32 remaining, pos;
   Uint32 tmp;
   char * data;
 
   tmp = SDL_ReadBE32 (src);
-  remaining = SDL12_RWsize(src) - SDL_RWtell(src);
+  pos = SDL_RWtell (src);
+  remaining = SDL_RWseek(src, 0, RW_SEEK_END) - pos;
+  SDL_RWseek(src, pos, RW_SEEK_SET);
+
   if (tmp == 0) {
     data = (char *) malloc(1);
     if (data) {
